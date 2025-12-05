@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>解答之树</title>
+    <style>
+        /* --- 1. 场景布置 --- */
+        body {
+            background: linear-gradient(to bottom, #e0f7fa, #a5d6a7); /* 蓝天到草地 */
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* 占满全屏 */
+            margin: 0;
+            overflow: hidden;
+            color: #2c3e50;
+        }
+
+        /* --- 2. 树的造型 (纯CSS画图) --- */
+        .tree-container {
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 20px;
+            /* 点击时禁止选中文本 */
+            user-select: none; 
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 树冠 */
+        .foliage {
+            width: 200px;
+            height: 200px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        
+        /* 树冠的层次感 (用伪元素画个小圈) */
+        .foliage::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 160px;
+            background-color: #66BB6a; /* 浅一点的绿 */
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        /* 树干 */
+        .trunk {
+            width: 40px;
+            height: 100px;
+            background-color: #795548;
+            margin: -40px auto 0; /* 向上插入树冠 */
+            position: relative;
+            z-index: 1;
+            border-radius: 5px;
+        }
+
+        /* --- 3. 动画效果 --- */
+        
+        /* 摇晃动画 */
+        @keyframes shake {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            50% { transform: rotate(0deg); }
+            75% { transform: rotate(-5deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .shaking .foliage {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        /* 答案出现的动画 */
+        .answer-text {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 1s;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            position: absolute;
+            z-index: 10;
+            width: 80%;
+        }
+
+        /* 引导文字 */
+        .instruction {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px 30px;
+            border-radius: 30px;
+            margin-top: 20px;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        /* 按钮 */
+        .btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #e65100;
+            transition: transform 0.1s;
+        }
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #e65100;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="tree-container" id="tree">
+        <div class="foliage">
+            <div id="answer" class="answer-text">?</div>
+        </div>
+        <div class="trunk"></div>
+    </div>
+
+    <div class="instruction">
+        默念你的问题，然后点击大树
+    </div>
+
+    <button class="btn" onclick="askTree()">告诉我答案</button>
+
+    <script>
+        // --- 1. 准备解答库 (你可以随意修改这里的话) ---
+        const answers = [
+            "放手去做", "别犹豫", "时机未到", "听从内心", 
+            "还需要点时间", "结果会很好", "相信直觉", 
+            "重新思考一下", "不要放弃", "这很重要", 
+            "顺其自然", "也许吧", "你需要休息", 
+            "大胆一点", "会有惊喜", "保持耐心"
+        ];
+
+        let isThinking = false; // 防止重复点击
+
+        function askTree() {
+            if (isThinking) return; // 如果正在想，点击无效
+            isThinking = true;
+
+            const treeElement = document.getElementById('tree');
+            const answerElement = document.getElementById('answer');
+            const instructionElement = document.querySelector('.instruction');
+
+            // 1. 开始摇晃
+            treeElement.classList.add('shaking');
+            answerElement.style.opacity = '0'; // 先隐藏旧答案
+            instructionElement.textContent = "树正在思考...";
+
+            // 2. 模拟思考时间 (1.5秒后出结果)
+            setTimeout(() => {
+                // 停止摇晃
+                treeElement.classList.remove('shaking');
+
+                // 随机选一个答案
+                const randomAnswer = answers[Math.floor(Math.random() * answers.length)];
+                
+                // 显示答案
+                answerElement.textContent = randomAnswer;
+                answerElement.style.opacity = '1';
+                
+                instructionElement.textContent = "树叶给出了回应";
+                
+                // 允许再次点击
+                isThinking = false;
+            }, 1500);
+        }
+    </script>
+
+</body>
+</html>
